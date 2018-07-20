@@ -20,10 +20,7 @@
 class DynamicTexturedCubeDemo : public CommonExampleInterface
 {
     CommonGraphicsApp* m_app;
-    float m_x;
-    float m_y;
-    float m_z;
-	b3AlignedObjectArray<int> m_movingInstances;
+  	b3AlignedObjectArray<int> m_movingInstances;
 	
 	
 	TinyVRGui* m_tinyVrGUI;
@@ -37,10 +34,7 @@ public:
     
     DynamicTexturedCubeDemo(CommonGraphicsApp* app)
     :m_app(app),
-    m_x(0),
-    m_y(0),
-	m_z(0),
-	m_tinyVrGUI(0)
+  	m_tinyVrGUI(0)
     {
 		m_app->setUpAxis(2);
         
@@ -72,7 +66,6 @@ public:
     virtual ~DynamicTexturedCubeDemo()
     {
 		delete m_tinyVrGUI;
-        m_app->m_renderer->enableBlend(false);
     }
 
     
@@ -127,8 +120,8 @@ public:
 	virtual void resetCamera()
 	{
 		float dist = 1.15;
-		float pitch = 396;
-		float yaw = 33.7;
+		float pitch = -33.7;
+		float yaw = 396;
 		float targetPos[3]={-0.5,0.7,1.45};
 		if (m_app->m_renderer  && m_app->m_renderer->getActiveCamera())
 		{

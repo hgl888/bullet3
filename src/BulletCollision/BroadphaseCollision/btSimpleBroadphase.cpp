@@ -24,8 +24,6 @@ subject to the following restrictions:
 
 #include <new>
 
-extern int gOverlappingPairs;
-
 void	btSimpleBroadphase::validate()
 {
 	for (int i=0;i<m_numHandles;i++)
@@ -84,7 +82,7 @@ btSimpleBroadphase::~btSimpleBroadphase()
 }
 
 
-btBroadphaseProxy*	btSimpleBroadphase::createProxy(  const btVector3& aabbMin,  const btVector3& aabbMax,int shapeType,void* userPtr ,short int collisionFilterGroup,short int collisionFilterMask, btDispatcher* /*dispatcher*/,void* multiSapProxy)
+btBroadphaseProxy*	btSimpleBroadphase::createProxy(  const btVector3& aabbMin,  const btVector3& aabbMax,int shapeType,void* userPtr , int collisionFilterGroup, int collisionFilterMask, btDispatcher* /*dispatcher*/)
 {
 	if (m_numHandles >= m_maxHandles)
 	{
@@ -94,7 +92,7 @@ btBroadphaseProxy*	btSimpleBroadphase::createProxy(  const btVector3& aabbMin,  
 	btAssert(aabbMin[0]<= aabbMax[0] && aabbMin[1]<= aabbMax[1] && aabbMin[2]<= aabbMax[2]);
 
 	int newHandleIndex = allocHandle();
-	btSimpleBroadphaseProxy* proxy = new (&m_pHandles[newHandleIndex])btSimpleBroadphaseProxy(aabbMin,aabbMax,shapeType,userPtr,collisionFilterGroup,collisionFilterMask,multiSapProxy);
+	btSimpleBroadphaseProxy* proxy = new (&m_pHandles[newHandleIndex])btSimpleBroadphaseProxy(aabbMin,aabbMax,shapeType,userPtr,collisionFilterGroup,collisionFilterMask);
 
 	return proxy;
 }
@@ -315,8 +313,7 @@ void	btSimpleBroadphase::calculateOverlappingPairs(btDispatcher* dispatcher)
 					pair.m_pProxy0 = 0;
 					pair.m_pProxy1 = 0;
 					m_invalidPair++;
-					gOverlappingPairs--;
-				} 
+				}
 
 			}
 

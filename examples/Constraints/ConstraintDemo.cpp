@@ -50,13 +50,13 @@ class AllConstraintDemo : public  CommonRigidBodyBase
 	virtual void resetCamera()
 	{
 		float dist = 27;
-		float pitch = 720;
-		float yaw = 30;
+		float pitch = -30;
+		float yaw = 720;
 		float targetPos[3]={2,0,-10};
-		m_guiHelper->resetCamera(dist,pitch,yaw,targetPos[0],targetPos[1],targetPos[2]);
+		m_guiHelper->resetCamera(dist,yaw,pitch,targetPos[0],targetPos[1],targetPos[2]);
 	}
 
-	virtual void keyboardCallback(unsigned char key, int x, int y);
+	virtual bool	keyboardCallback(int key, int state);
 
 	// for cone-twist motor driving
 	float m_Time;
@@ -66,7 +66,6 @@ class AllConstraintDemo : public  CommonRigidBodyBase
 
 
 
-const int numObjects = 3;
 
 #define ENABLE_ALL_DEMOS 1
 
@@ -357,7 +356,7 @@ void	AllConstraintDemo::initPhysics()
 
 		spSlider6Dof->getTranslationalLimitMotor()->m_enableMotor[0] = true;
 		spSlider6Dof->getTranslationalLimitMotor()->m_targetVelocity[0] = -5.0f;
-		spSlider6Dof->getTranslationalLimitMotor()->m_maxMotorForce[0] = 0.1f;
+		spSlider6Dof->getTranslationalLimitMotor()->m_maxMotorForce[0] = 6.0f;
 
 
 		m_dynamicsWorld->addConstraint(spSlider6Dof);
@@ -432,7 +431,7 @@ void	AllConstraintDemo::initPhysics()
 
 //		pGen6DOF->getTranslationalLimitMotor()->m_enableMotor[0] = true;
 //		pGen6DOF->getTranslationalLimitMotor()->m_targetVelocity[0] = 5.0f;
-//		pGen6DOF->getTranslationalLimitMotor()->m_maxMotorForce[0] = 0.1f;
+//		pGen6DOF->getTranslationalLimitMotor()->m_maxMotorForce[0] = 6.0f;
 
 
 //		pGen6DOF->setAngularLowerLimit(btVector3(0., SIMD_HALF_PI*0.9, 0.));
@@ -663,7 +662,7 @@ void	AllConstraintDemo::initPhysics()
 
 		pGen6Dof->getTranslationalLimitMotor()->m_enableMotor[0] = true;
 		pGen6Dof->getTranslationalLimitMotor()->m_targetVelocity[0] = 5.0f;
-		pGen6Dof->getTranslationalLimitMotor()->m_maxMotorForce[0] = 0.1f;
+		pGen6Dof->getTranslationalLimitMotor()->m_maxMotorForce[0] = 6.0f;
 	}
 #endif
 
@@ -839,10 +838,11 @@ void AllConstraintDemo::displayCallback(void) {
 }
 #endif
 
-void AllConstraintDemo::keyboardCallback(unsigned char key, int x, int y)
+bool	AllConstraintDemo::keyboardCallback(int key, int state)
 {
-	(void)x;
-	(void)y;
+	
+	bool handled = false;
+	
 	switch (key) 
 	{
 		case 'O' :
@@ -870,6 +870,7 @@ void AllConstraintDemo::keyboardCallback(unsigned char key, int x, int y)
 					printf("Slider6Dof %s frame offset\n", offectOnOff ? "uses" : "does not use");
 				}
 			}
+			handled = true;
 			break;
 		default : 
 			{
@@ -877,6 +878,8 @@ void AllConstraintDemo::keyboardCallback(unsigned char key, int x, int y)
 			}
 			break;
 	}
+	return handled;
+	
 }
 
 class CommonExampleInterface*    AllConstraintCreateFunc(struct CommonExampleOptions& options)

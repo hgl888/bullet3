@@ -13,7 +13,7 @@ INCLUDE_DIRECTORIES(
 ADD_DEFINITIONS(-D_VARIADIC_MAX=10)
 
 LINK_LIBRARIES(
- BulletInverseDynamicsUtils BulletInverseDynamics Bullet3Common LinearMath gtest
+ BulletInverseDynamicsUtils BulletInverseDynamics Bullet3Common LinearMath gtest 
 )
 IF (NOT WIN32)
 	LINK_LIBRARIES(		pthread	)
@@ -37,6 +37,7 @@ INCLUDE_DIRECTORIES(
         ../../src
         ../gtest-1.7.0/include
         ../../Extras/InverseDynamics
+        ../../examples/ThirdPartyLibs
 )
 
 
@@ -44,7 +45,7 @@ INCLUDE_DIRECTORIES(
 ADD_DEFINITIONS(-D_VARIADIC_MAX=10)
 
 LINK_LIBRARIES(
-BulletDynamics BulletCollision  BulletInverseDynamicsUtils BulletInverseDynamics Bullet3Common LinearMath gtest
+BulletDynamics BulletCollision  BulletInverseDynamicsUtils BulletInverseDynamics Bullet3Common LinearMath gtest 
 )
 IF (NOT WIN32)
         LINK_LIBRARIES(         pthread )
@@ -83,11 +84,8 @@ ENDIF()
         	../../examples/Importers/ImportColladaDemo/LoadMeshFromCollada.cpp
         	../../examples/Importers/ImportColladaDemo/ColladaGraphicsInstance.h
         	../../examples/ThirdPartyLibs/Wavefront/tiny_obj_loader.cpp
-		../../examples/ThirdPartyLibs/tinyxml/tinystr.cpp
-		../../examples/ThirdPartyLibs/tinyxml/tinyxml.cpp
-		../../examples/ThirdPartyLibs/tinyxml/tinyxmlerror.cpp
-		../../examples/ThirdPartyLibs/tinyxml/tinyxmlparser.cpp
-
+		../../examples/ThirdPartyLibs/tinyxml2/tinyxml2.cpp
+		
         )
 
 ADD_TEST(Test_BulletInverseForwardDynamics_PASS Test_BulletInverseForwardDynamics)
@@ -110,7 +108,7 @@ INCLUDE_DIRECTORIES(
 ADD_DEFINITIONS(-D_VARIADIC_MAX=10)
 
 LINK_LIBRARIES(
- BulletInverseDynamicsUtils BulletInverseDynamics Bullet3Common LinearMath gtest
+ BulletInverseDynamicsUtils BulletInverseDynamics Bullet3Common LinearMath gtest 
 )
 IF (NOT WIN32)
         LINK_LIBRARIES(         pthread )

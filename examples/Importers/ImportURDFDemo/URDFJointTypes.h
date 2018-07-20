@@ -1,6 +1,7 @@
 #ifndef URDF_JOINT_TYPES_H
 #define URDF_JOINT_TYPES_H
 
+#include "LinearMath/btScalar.h"
 
 enum UrdfJointTypes
 {
@@ -11,7 +12,6 @@ enum UrdfJointTypes
 		URDFPlanarJoint,
 		URDFFixedJoint,
 };
-#include "LinearMath/btScalar.h"
 
 enum URDF_LinkContactFlags
 {
@@ -22,7 +22,9 @@ enum URDF_LinkContactFlags
 	URDF_CONTACT_HAS_STIFFNESS_DAMPING=16,
     URDF_CONTACT_HAS_ROLLING_FRICTION=32,
     URDF_CONTACT_HAS_SPINNING_FRICTION=64,
-
+	URDF_CONTACT_HAS_RESTITUTION=128,
+	URDF_CONTACT_HAS_FRICTION_ANCHOR=256,
+    
 };
 
 struct URDFLinkContactInfo
@@ -30,6 +32,7 @@ struct URDFLinkContactInfo
 	btScalar m_lateralFriction;
 	btScalar m_rollingFriction;
     btScalar m_spinningFriction;
+	btScalar m_restitution;
     btScalar m_inertiaScaling;
 	btScalar m_contactCfm;
 	btScalar m_contactErp;
@@ -42,6 +45,7 @@ struct URDFLinkContactInfo
 		:m_lateralFriction(0.5),
 		m_rollingFriction(0),
         m_spinningFriction(0),
+		m_restitution(0),
         m_inertiaScaling(1),
 		m_contactCfm(0),
 		m_contactErp(0),
@@ -52,5 +56,22 @@ struct URDFLinkContactInfo
 	}
 };
 
+enum UrdfCollisionFlags
+{
+	URDF_FORCE_CONCAVE_TRIMESH=1,
+	URDF_HAS_COLLISION_GROUP=2,
+	URDF_HAS_COLLISION_MASK=4,
+};
+
+struct UrdfMaterialColor
+{
+	btVector4 m_rgbaColor;
+	btVector3 m_specularColor;
+	UrdfMaterialColor()
+		:m_rgbaColor(0.8, 0.8, 0.8, 1),
+		m_specularColor(0.4,0.4,0.4)
+	{
+	}
+};
 
 #endif //URDF_JOINT_TYPES_H

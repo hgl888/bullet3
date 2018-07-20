@@ -253,7 +253,7 @@ btScalar btMultiBodyConstraint::fillMultiBodyConstraint(	btMultiBodySolverConstr
         {
             vec = ( solverConstraint.m_angularComponentA).cross(rel_pos1);
             if (angConstraint) {
-                denom0 = rb0->getInvMass() + constraintNormalAng.dot(vec);
+				denom0 = constraintNormalAng.dot(solverConstraint.m_angularComponentA);
             }
             else {
                 denom0 = rb0->getInvMass() + constraintNormalLin.dot(vec);
@@ -277,7 +277,7 @@ btScalar btMultiBodyConstraint::fillMultiBodyConstraint(	btMultiBodySolverConstr
         {
             vec = ( -solverConstraint.m_angularComponentB).cross(rel_pos2);
             if (angConstraint) {
-                denom1 = rb1->getInvMass() + constraintNormalAng.dot(vec);
+				denom1 = constraintNormalAng.dot(-solverConstraint.m_angularComponentB);
             }
             else {
                 denom1 = rb1->getInvMass() + constraintNormalLin.dot(vec);
@@ -315,7 +315,8 @@ btScalar btMultiBodyConstraint::fillMultiBodyConstraint(	btMultiBodySolverConstr
         }
         else if(rb0)
         {
-            rel_vel += rb0->getVelocityInLocalPoint(rel_pos1).dot(solverConstraint.m_contactNormal1);
+			rel_vel += rb0->getLinearVelocity().dot(solverConstraint.m_contactNormal1);
+			rel_vel += rb0->getAngularVelocity().dot(solverConstraint.m_relpos1CrossNormal);
         }
         if (multiBodyB)
         {
@@ -327,7 +328,8 @@ btScalar btMultiBodyConstraint::fillMultiBodyConstraint(	btMultiBodySolverConstr
         }
         else if(rb1)
         {
-            rel_vel += rb1->getVelocityInLocalPoint(rel_pos2).dot(solverConstraint.m_contactNormal2);
+			rel_vel += rb1->getLinearVelocity().dot(solverConstraint.m_contactNormal2);
+			rel_vel += rb1->getAngularVelocity().dot(solverConstraint.m_relpos2CrossNormal);
         }
         
         solverConstraint.m_friction = 0.f;//cp.m_combinedFriction;
@@ -378,7 +380,9 @@ btScalar btMultiBodyConstraint::fillMultiBodyConstraint(	btMultiBodySolverConstr
         
         
         btScalar erp = infoGlobal.m_erp2;
-        if (!infoGlobal.m_splitImpulse || (penetration > infoGlobal.m_splitImpulsePenetrationThreshold))
+		
+		//split impulse is not implemented yet for btMultiBody*
+		//if (!infoGlobal.m_splitImpulse || (penetration > infoGlobal.m_splitImpulsePenetrationThreshold))
         {
             erp = infoGlobal.m_erp;
         }
@@ -388,19 +392,23 @@ btScalar btMultiBodyConstraint::fillMultiBodyConstraint(	btMultiBodySolverConstr
         btScalar  penetrationImpulse = positionalError*solverConstraint.m_jacDiagABInv;
         btScalar velocityImpulse = velocityError *solverConstraint.m_jacDiagABInv;
         
-        if (!infoGlobal.m_splitImpulse || (penetration > infoGlobal.m_splitImpulsePenetrationThreshold))
+		//split impulse is not implemented yet for btMultiBody*
+
+      //  if (!infoGlobal.m_splitImpulse || (penetration > infoGlobal.m_splitImpulsePenetrationThreshold))
         {
             //combine position and velocity into rhs
             solverConstraint.m_rhs = penetrationImpulse+velocityImpulse;
             solverConstraint.m_rhsPenetration = 0.f;
             
-        } else
+        } 
+		/*else
         {
             //split position and velocity into rhs and m_rhsPenetration
             solverConstraint.m_rhs = velocityImpulse;
             solverConstraint.m_rhsPenetration = penetrationImpulse;
         }
-        
+        */
+
         solverConstraint.m_cfm = 0.f;
         solverConstraint.m_lowerLimit = lowerLimit;
         solverConstraint.m_upperLimit = upperLimit;

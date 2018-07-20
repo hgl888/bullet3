@@ -79,6 +79,7 @@ protected:
 
 	int				m_islandTag1;
 	int				m_companionId;
+    int             m_worldArrayIndex;  // index of object in world's collisionObjects array
 
 	mutable int				m_activationState1;
 	mutable btScalar			m_deactivationTime;
@@ -121,6 +122,7 @@ protected:
 	///internal update revision number. It will be increased when the object changes. This allows some subsystems to perform lazy evaluation.
 	int			m_updateRevision;
 
+	btVector3	m_customDebugColorRGB;
 
 public:
 
@@ -135,7 +137,10 @@ public:
 		CF_CHARACTER_OBJECT = 16,
 		CF_DISABLE_VISUALIZE_OBJECT = 32, //disable debug drawing
 		CF_DISABLE_SPU_COLLISION_PROCESSING = 64,//disable parallel/SPU processing
-		CF_HAS_CONTACT_STIFFNESS_DAMPING = 128
+		CF_HAS_CONTACT_STIFFNESS_DAMPING = 128,
+		CF_HAS_CUSTOM_DEBUG_RENDERING_COLOR = 256,
+		CF_HAS_FRICTION_ANCHOR = 512,
+		CF_HAS_COLLISION_SOUND_TRIGGER = 1024
 	};
 
 	enum	CollisionObjectTypes
@@ -455,7 +460,18 @@ public:
 		m_companionId = id;
 	}
 
-	SIMD_FORCE_INLINE btScalar			getHitFraction() const
+    SIMD_FORCE_INLINE int getWorldArrayIndex() const
+    {
+        return	m_worldArrayIndex;
+    }
+
+    // only should be called by CollisionWorld
+    void setWorldArrayIndex(int ix)
+    {
+        m_worldArrayIndex = ix;
+    }
+
+    SIMD_FORCE_INLINE btScalar			getHitFraction() const
 	{
 		return m_hitFraction; 
 	}
@@ -544,6 +560,26 @@ public:
 		return m_updateRevision;
 	}
 
+	void	setCustomDebugColor(const btVector3& colorRGB)
+	{
+		m_customDebugColorRGB = colorRGB;
+		m_collisionFlags |= CF_HAS_CUSTOM_DEBUG_RENDERING_COLOR;
+	}
+
+	void	removeCustomDebugColor()
+	{
+		m_collisionFlags &= ~CF_HAS_CUSTOM_DEBUG_RENDERING_COLOR;
+	}
+
+	bool getCustomDebugColor(btVector3& colorRGB) const
+	{
+		bool hasCustomColor = (0!=(m_collisionFlags&CF_HAS_CUSTOM_DEBUG_RENDERING_COLOR));
+		if (hasCustomColor)
+		{
+			colorRGB = m_customDebugColorRGB;
+		}
+		return hasCustomColor;
+	}
 
 	inline bool checkCollideWith(const btCollisionObject* co) const
 	{
@@ -585,7 +621,6 @@ struct	btCollisionObjectDoubleData
 	double					m_hitFraction; 
 	double					m_ccdSweptSphereRadius;
 	double					m_ccdMotionThreshold;
-
 	int						m_hasAnisotropicFriction;
 	int						m_collisionFlags;
 	int						m_islandTag1;
@@ -593,8 +628,9 @@ struct	btCollisionObjectDoubleData
 	int						m_activationState1;
 	int						m_internalType;
 	int						m_checkCollideWith;
-
-	char	m_padding[4];
+	int						m_collisionFilterGroup;
+	int						m_collisionFilterMask;
+	int						m_uniqueId;//m_uniqueId is introduced for paircache. could get rid of this, by calculating the address offset etc.
 };
 
 ///do not change those serialization structures, it requires an updated sBulletDNAstr/sBulletDNAstr64
@@ -614,13 +650,12 @@ struct	btCollisionObjectFloatData
 	float					m_deactivationTime;
 	float					m_friction;
 	float					m_rollingFriction;
-    float                   m_contactDamping;
+	float                   m_contactDamping;
     float                   m_contactStiffness;
 	float					m_restitution;
 	float					m_hitFraction; 
 	float					m_ccdSweptSphereRadius;
 	float					m_ccdMotionThreshold;
-
 	int						m_hasAnisotropicFriction;
 	int						m_collisionFlags;
 	int						m_islandTag1;
@@ -628,7 +663,9 @@ struct	btCollisionObjectFloatData
 	int						m_activationState1;
 	int						m_internalType;
 	int						m_checkCollideWith;
-	char					m_padding[4];
+	int						m_collisionFilterGroup;
+	int						m_collisionFilterMask;
+	int						m_uniqueId;
 };
 
 

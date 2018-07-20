@@ -78,7 +78,7 @@ TimeSeriesCanvas::TimeSeriesCanvas(struct Common2dCanvasInterface* canvasInterfa
 
 	if (canvasInterface)
 	{
-		m_internalData->m_canvasIndex = m_internalData->m_canvasInterface->createCanvas(windowTitle,m_internalData->m_width,m_internalData->m_height);
+		m_internalData->m_canvasIndex = m_internalData->m_canvasInterface->createCanvas(windowTitle,m_internalData->m_width,m_internalData->m_height,20,50);
 	}
 }
 
@@ -298,7 +298,7 @@ void TimeSeriesCanvas::insertDataAtCurrentTime(float orgV, int dataSourceIndex, 
 	float amp = m_internalData->m_pixelsPerUnit;
 	//insert some new value(s) in the right-most column
 	{
-		float time = m_internalData->getTime();
+	//	float time = m_internalData->getTime();
 		
 		float v = zero+amp*orgV;
 		

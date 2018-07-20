@@ -20,7 +20,8 @@ subject to the following restrictions:
 #endif
 btWorldImporter::btWorldImporter(btDynamicsWorld* world)
 :m_dynamicsWorld(world),
-m_verboseMode(0)
+m_verboseMode(0),
+m_importerFlags(0)
 {
 
 }
@@ -468,14 +469,11 @@ btCollisionShape* btWorldImporter::convertCollisionShape(  btCollisionShapeData*
 				btCompoundShapeData* compoundData = (btCompoundShapeData*)shapeData;
 				btCompoundShape* compoundShape = createCompoundShape();
 
-				btCompoundShapeChildData* childShapeDataArray = &compoundData->m_childShapePtr[0];
-				
-
+			
 				btAlignedObjectArray<btCollisionShape*> childShapes;
 				for (int i=0;i<compoundData->m_numChildShapes;i++)
 				{
-					btCompoundShapeChildData* ptr = &compoundData->m_childShapePtr[i];
-
+					
 					btCollisionShapeData* cd = compoundData->m_childShapePtr[i].m_childShape;
 
 					btCollisionShape* childShape = convertCollisionShape(cd);
@@ -997,11 +995,11 @@ void	btWorldImporter::convertConstraintFloat(btTypedConstraintFloatData* constra
 						dof->setStiffness(i,dofData->m_linearSpringStiffness.m_floats[i],dofData->m_linearSpringStiffnessLimited[i]!=0);
 						dof->setEquilibriumPoint(i,dofData->m_linearEquilibriumPoint.m_floats[i]);
 						dof->enableSpring(i,dofData->m_linearEnableSpring[i]!=0);
-						dof->setDamping(i,dofData->m_linearSpringDamping.m_floats[i],dofData->m_linearSpringDampingLimited[i]);
+						dof->setDamping(i,dofData->m_linearSpringDamping.m_floats[i],(dofData->m_linearSpringDampingLimited[i]!=0));
 					}
 					for (i=0;i<3;i++)
 					{
-						dof->setStiffness(i+3,dofData->m_angularSpringStiffness.m_floats[i],dofData->m_angularSpringStiffnessLimited[i]);
+						dof->setStiffness(i+3,dofData->m_angularSpringStiffness.m_floats[i],(dofData->m_angularSpringStiffnessLimited[i]!=0));
 						dof->setEquilibriumPoint(i+3,dofData->m_angularEquilibriumPoint.m_floats[i]);
 						dof->enableSpring(i+3,dofData->m_angularEnableSpring[i]!=0);
 						dof->setDamping(i+3,dofData->m_angularSpringDamping.m_floats[i],dofData->m_angularSpringDampingLimited[i]);
@@ -1327,14 +1325,14 @@ void	btWorldImporter::convertConstraintDouble(btTypedConstraintDoubleData* const
 						dof->setStiffness(i,dofData->m_linearSpringStiffness.m_floats[i],dofData->m_linearSpringStiffnessLimited[i]);
 						dof->setEquilibriumPoint(i,dofData->m_linearEquilibriumPoint.m_floats[i]);
 						dof->enableSpring(i,dofData->m_linearEnableSpring[i]!=0);
-						dof->setDamping(i,dofData->m_linearSpringDamping.m_floats[i],dofData->m_linearSpringDampingLimited[i]);
+						dof->setDamping(i,dofData->m_linearSpringDamping.m_floats[i],(dofData->m_linearSpringDampingLimited[i]!=0));
 					}
 					for (i=0;i<3;i++)
 					{
-						dof->setStiffness(i+3,dofData->m_angularSpringStiffness.m_floats[i],dofData->m_angularSpringStiffnessLimited[i]);
+						dof->setStiffness(i+3,dofData->m_angularSpringStiffness.m_floats[i],(dofData->m_angularSpringStiffnessLimited[i]!=0));
 						dof->setEquilibriumPoint(i+3,dofData->m_angularEquilibriumPoint.m_floats[i]);
 						dof->enableSpring(i+3,dofData->m_angularEnableSpring[i]!=0);
-						dof->setDamping(i+3,dofData->m_angularSpringDamping.m_floats[i],dofData->m_angularSpringDampingLimited[i]);
+						dof->setDamping(i+3,dofData->m_angularSpringDamping.m_floats[i],(dofData->m_angularSpringDampingLimited[i]!=0));
 					}
 
 				}

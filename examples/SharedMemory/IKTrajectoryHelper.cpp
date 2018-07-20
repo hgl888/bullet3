@@ -16,14 +16,15 @@ struct IKTrajectoryHelperInternalData
 {
     VectorR3 m_endEffectorTargetPosition;
     VectorRn m_nullSpaceVelocity;
+    VectorRn m_dampingCoeff;
     
     b3AlignedObjectArray<Node*> m_ikNodes;
-    Jacobian* m_ikJacobian;
     
     IKTrajectoryHelperInternalData()
     {
         m_endEffectorTargetPosition.SetZero();
         m_nullSpaceVelocity.SetZero();
+        m_dampingCoeff.SetZero();
     }
 };
 
@@ -46,25 +47,24 @@ bool IKTrajectoryHelper::computeIK(const double endEffectorTargetPosition[3],
                const double* q_current, int numQ,int endEffectorIndex,
                double* q_new, int ikMethod, const double* linear_jacobian, const double* angular_jacobian, int jacobian_size, const double dampIk[6])
 {
-	bool useAngularPart = (ikMethod==IK2_VEL_DLS_WITH_ORIENTATION || ikMethod==IK2_VEL_DLS_WITH_ORIENTATION_NULLSPACE) ? true : false;
+	bool useAngularPart = (ikMethod==IK2_VEL_DLS_WITH_ORIENTATION || ikMethod==IK2_VEL_DLS_WITH_ORIENTATION_NULLSPACE
+						   || ikMethod==IK2_VEL_SDLS_WITH_ORIENTATION) ? true : false;
 
-	m_data->m_ikJacobian = new Jacobian(useAngularPart,numQ);
-	
-//    Reset(m_ikTree,m_ikJacobian);
+    Jacobian ikJacobian(useAngularPart,numQ);
 
-    m_data->m_ikJacobian->Reset();
+    ikJacobian.Reset();
 
     bool UseJacobianTargets1 = false;
     
     if ( UseJacobianTargets1 ) {
-        m_data->m_ikJacobian->SetJtargetActive();
+        ikJacobian.SetJtargetActive();
     }
     else {
-        m_data->m_ikJacobian->SetJendActive();
+        ikJacobian.SetJendActive();
     }
     VectorR3 targets;
     targets.Set(endEffectorTargetPosition[0],endEffectorTargetPosition[1],endEffectorTargetPosition[2]);
-    m_data->m_ikJacobian->ComputeJacobian(&targets);						// Set up Jacobian and deltaS vectors
+    ikJacobian.ComputeJacobian(&targets);						// Set up Jacobian and deltaS vectors
     
     // Set one end effector world position from Bullet
     VectorRn deltaS(3);
@@ -112,8 +112,8 @@ bool IKTrajectoryHelper::computeIK(const double endEffectorTargetPosition[3],
 					completeJacobian.Set(i+3,j,angular_jacobian[i*numQ+j]);
 				}
 			}
-			m_data->m_ikJacobian->SetDeltaS(deltaC);
-			m_data->m_ikJacobian->SetJendTrans(completeJacobian);
+			ikJacobian.SetDeltaS(deltaC);
+			ikJacobian.SetJendTrans(completeJacobian);
 		} else
 		{
 			VectorRn deltaC(3);
@@ -126,53 +126,57 @@ bool IKTrajectoryHelper::computeIK(const double endEffectorTargetPosition[3],
 					completeJacobian.Set(i,j,linear_jacobian[i*numQ+j]);
 				}
 			}
-			m_data->m_ikJacobian->SetDeltaS(deltaC);
-			m_data->m_ikJacobian->SetJendTrans(completeJacobian);
+			ikJacobian.SetDeltaS(deltaC);
+			ikJacobian.SetJendTrans(completeJacobian);
 		}
     }
     
     // Calculate the change in theta values
     switch (ikMethod) {
         case IK2_JACOB_TRANS:
-            m_data->m_ikJacobian->CalcDeltaThetasTranspose();		// Jacobian transpose method
+            ikJacobian.CalcDeltaThetasTranspose();		// Jacobian transpose method
             break;
 		case IK2_DLS:
-        case IK2_VEL_DLS:
 		case IK2_VEL_DLS_WITH_ORIENTATION:
-            m_data->m_ikJacobian->CalcDeltaThetasDLS();			// Damped least squares method
+		case IK2_VEL_DLS:
+            //ikJacobian.CalcDeltaThetasDLS();			// Damped least squares method
+            assert(m_data->m_dampingCoeff.GetLength()==numQ);
+            ikJacobian.CalcDeltaThetasDLS2(m_data->m_dampingCoeff);
             break;
         case IK2_VEL_DLS_WITH_NULLSPACE:
         case IK2_VEL_DLS_WITH_ORIENTATION_NULLSPACE:
             assert(m_data->m_nullSpaceVelocity.GetLength()==numQ);
-            m_data->m_ikJacobian->CalcDeltaThetasDLSwithNullspace(m_data->m_nullSpaceVelocity);
+            ikJacobian.CalcDeltaThetasDLSwithNullspace(m_data->m_nullSpaceVelocity);
             break;
         case IK2_DLS_SVD:
-            m_data->m_ikJacobian->CalcDeltaThetasDLSwithSVD();
+            ikJacobian.CalcDeltaThetasDLSwithSVD();
             break;
         case IK2_PURE_PSEUDO:
-            m_data->m_ikJacobian->CalcDeltaThetasPseudoinverse();	// Pure pseudoinverse method
+            ikJacobian.CalcDeltaThetasPseudoinverse();	// Pure pseudoinverse method
             break;
         case IK2_SDLS:
-            m_data->m_ikJacobian->CalcDeltaThetasSDLS();			// Selectively damped least squares method
+		case IK2_VEL_SDLS:
+		case IK2_VEL_SDLS_WITH_ORIENTATION:
+            ikJacobian.CalcDeltaThetasSDLS();			// Selectively damped least squares method
             break;
         default:
-            m_data->m_ikJacobian->ZeroDeltaThetas();
+            ikJacobian.ZeroDeltaThetas();
             break;
     }
     
     // Use for velocity IK, update theta dot
-    //m_data->m_ikJacobian->UpdateThetaDot();
+    //ikJacobian.UpdateThetaDot();
     
     // Use for position IK, incrementally update theta
-    //m_data->m_ikJacobian->UpdateThetas();
+    //ikJacobian.UpdateThetas();
     
     // Apply the change in the theta values
-    //m_data->m_ikJacobian->UpdatedSClampValue(&targets);
+    //ikJacobian.UpdatedSClampValue(&targets);
     
     for (int i=0;i<numQ;i++)
     {
         // Use for velocity IK
-        q_new[i] = m_data->m_ikJacobian->dTheta[i] + q_current[i];
+        q_new[i] = ikJacobian.dTheta[i] + q_current[i];
         
         // Use for position IK
         //q_new[i] = m_data->m_ikNodes[i]->GetTheta();
@@ -184,7 +188,9 @@ bool IKTrajectoryHelper::computeNullspaceVel(int numQ, const double* q_current, 
 {
     m_data->m_nullSpaceVelocity.SetLength(numQ);
     m_data->m_nullSpaceVelocity.SetZero();
-    double stayCloseToZeroGain = 0.1;
+	// TODO: Expose the coefficents of the null space term so that the user can choose to balance the null space task and the IK target task.
+	// Can also adaptively adjust the coefficients based on the residual of the null space velocity in the IK target task space.
+    double stayCloseToZeroGain = 0.001;
     double stayAwayFromLimitsGain = 10.0;
 
     // Stay close to zero
@@ -201,6 +207,17 @@ bool IKTrajectoryHelper::computeNullspaceVel(int numQ, const double* q_current, 
         if (q_current[i] < lower_limit[i]) {
             m_data->m_nullSpaceVelocity[i] += stayAwayFromLimitsGain * (lower_limit[i] - q_current[i]) / joint_range[i];
         }
+    }
+    return true;
+}
+
+bool IKTrajectoryHelper::setDampingCoeff(int numQ, const double* coeff)
+{
+    m_data->m_dampingCoeff.SetLength(numQ);
+    m_data->m_dampingCoeff.SetZero();
+    for (int i = 0; i < numQ; ++i)
+    {
+        m_data->m_dampingCoeff[i] = coeff[i];
     }
     return true;
 }

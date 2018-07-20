@@ -11,7 +11,7 @@ FILE(GLOB GwenGUISupport_HDRS  "GwenGUISupport/*" )
 
 IF (WIN32)
         INCLUDE_DIRECTORIES(
-                ${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/Glew
+                ${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/glad
         )
 				ADD_DEFINITIONS(-DGLEW_STATIC)
 ELSE(WIN32)
@@ -21,7 +21,7 @@ ELSE(WIN32)
                 ADD_DEFINITIONS("-DGLEW_INIT_OPENGL11_FUNCTIONS=1")
                 ADD_DEFINITIONS("-DGLEW_STATIC")
                 ADD_DEFINITIONS("-DGLEW_DYNAMIC_LOAD_ALL_GLX_FUNCTIONS=1")
-                INCLUDE_DIRECTORIES( ${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/Glew )
+                INCLUDE_DIRECTORIES( ${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/glad )
      		ENDIF(APPLE)
 ENDIF(WIN32)
 
@@ -34,8 +34,12 @@ ADD_LIBRARY(BulletExampleBrowserLib
 	CollisionShape2TriangleMesh.h
 	../Utils/b3Clock.cpp
 	../Utils/b3Clock.h
+	../Utils/ChromeTraceUtil.cpp
+	../Utils/ChromeTraceUtil.h
 	../Utils/b3ResourcePath.cpp
 	../Utils/b3ResourcePath.h
+	../Utils/b3ERPCFMHelper.hpp
+	../Utils/b3ReferenceFrameHelper.hpp
 	${GwenGUISupport_SRCS}
 	${GwenGUISupport_HDRS}
 	
@@ -61,7 +65,7 @@ IF (BUILD_SHARED_LIBS)
                  TARGET_LINK_LIBRARIES(
                                 BulletExampleBrowserLib Bullet3Common BulletSoftBody BulletDynamics BulletCollision BulletInverseDynamicsUtils
                                 BulletInverseDynamics LinearMath OpenGLWindow gwen BussIK
-                                pthread dl
+                                pthread ${DL}
                         )
         ENDIF(APPLE)
 	ENDIF(WIN32)
@@ -76,6 +80,7 @@ ENDIF(BUILD_SHARED_LIBS)
 INCLUDE_DIRECTORIES(
         .
         ${BULLET_PHYSICS_SOURCE_DIR}/src
+	${BULLET_PHYSICS_SOURCE_DIR}/examples/SharedMemory
         ${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs
 )
 
@@ -86,7 +91,7 @@ LINK_LIBRARIES(
 
 IF (WIN32)
 	INCLUDE_DIRECTORIES(
-		${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/Glew
+		${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/glad
 	)
 	LINK_LIBRARIES(
 		${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}
@@ -97,46 +102,62 @@ ELSE(WIN32)
                 find_library(COCOA NAMES Cocoa)
                 MESSAGE(${COCOA})
                 link_libraries(${COCOA} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
+		INCLUDE_DIRECTORIES( ${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/glad )
   ELSE(APPLE)
 		ADD_DEFINITIONS("-DGLEW_INIT_OPENGL11_FUNCTIONS=1")
 		ADD_DEFINITIONS("-DGLEW_STATIC")
 		ADD_DEFINITIONS("-DGLEW_DYNAMIC_LOAD_ALL_GLX_FUNCTIONS=1")
-		INCLUDE_DIRECTORIES( ${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/Glew )
-		LINK_LIBRARIES( pthread dl)
+		INCLUDE_DIRECTORIES( ${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/glad )
+		LINK_LIBRARIES( pthread ${DL})
 	ENDIF(APPLE)
 ENDIF(WIN32)
 
 
 SET(ExtendedTutorialsSources
-	../ExtendedTutorials/SimpleBox.cpp
-	../ExtendedTutorials/MultipleBoxes.cpp
-	../ExtendedTutorials/SimpleJoint.cpp
-	../ExtendedTutorials/SimpleCloth.cpp
 	../ExtendedTutorials/Chain.cpp 
-	../ExtendedTutorials/Bridge.cpp 
+	../ExtendedTutorials/Chain.h
+	../ExtendedTutorials/Bridge.cpp
+	../ExtendedTutorials/Bridge.h
 	../ExtendedTutorials/RigidBodyFromObj.cpp
+	../ExtendedTutorials/RigidBodyFromObj.h
+    ../ExtendedTutorials/SimpleBox.cpp
+	../ExtendedTutorials/SimpleBox.h
+	../ExtendedTutorials/MultipleBoxes.cpp
+	../ExtendedTutorials/MultipleBoxes.h
+	../ExtendedTutorials/CompoundBoxes.cpp
+	../ExtendedTutorials/CompoundBoxes.h
+	../ExtendedTutorials/SimpleCloth.cpp
+	../ExtendedTutorials/SimpleCloth.h
+	../ExtendedTutorials/SimpleJoint.cpp
+	../ExtendedTutorials/SimpleJoint.h
+	../ExtendedTutorials/NewtonsCradle.cpp
+	../ExtendedTutorials/NewtonsCradle.h
 	../ExtendedTutorials/InclinedPlane.cpp
 	../ExtendedTutorials/InclinedPlane.h
-	../ExtendedTutorials/NewtonsCradle.cpp
+	../ExtendedTutorials/MultiPendulum.cpp
+	../ExtendedTutorials/MultiPendulum.h
 )
 
 SET(BulletExampleBrowser_SRCS
-	
+
 	../TinyRenderer/geometry.cpp
 	../TinyRenderer/model.cpp
 	../TinyRenderer/tgaimage.cpp
 	../TinyRenderer/our_gl.cpp
 	../TinyRenderer/TinyRenderer.cpp
-	../SharedMemory/TinyRendererVisualShapeConverter.cpp
-	../SharedMemory/TinyRendererVisualShapeConverter.h
+	../SharedMemory/plugins/pdControlPlugin/pdControlPlugin.cpp
+	../SharedMemory/plugins/pdControlPlugin/pdControlPlugin.h
+	../SharedMemory/plugins/tinyRendererPlugin/tinyRendererPlugin.cpp
+	../SharedMemory/plugins/tinyRendererPlugin/TinyRendererVisualShapeConverter.cpp
 	../SharedMemory/IKTrajectoryHelper.cpp
 	../SharedMemory/IKTrajectoryHelper.h
-	
 	../SharedMemory/PhysicsServer.cpp
 	../SharedMemory/PhysicsClientSharedMemory.cpp
+	../SharedMemory/PhysicsClientSharedMemory_C_API.cpp
 	../SharedMemory/PhysicsClient.cpp
 	../SharedMemory/PhysicsClientC_API.cpp
 	../SharedMemory/PhysicsServerExample.cpp
+	../SharedMemory/PhysicsServerExampleBullet2.cpp
 	../SharedMemory/PhysicsClientExample.cpp
 	../SharedMemory/PosixSharedMemory.cpp
 	../SharedMemory/Win32SharedMemory.cpp
@@ -153,6 +174,15 @@ SET(BulletExampleBrowser_SRCS
 	../SharedMemory/PhysicsLoopBackC_API.h
 	../SharedMemory/PhysicsServerCommandProcessor.cpp
 	../SharedMemory/PhysicsServerCommandProcessor.h
+	../SharedMemory/SharedMemoryCommands.h
+	../SharedMemory/SharedMemoryPublic.h
+	../SharedMemory/b3PluginManager.cpp
+	../SharedMemory/b3RobotSimulatorClientAPI_NoGUI.cpp
+	../SharedMemory/b3RobotSimulatorClientAPI_NoGUI.h
+	../SharedMemory/b3RobotSimulatorClientAPI_NoDirect.cpp
+	../SharedMemory/b3RobotSimulatorClientAPI_NoDirect.h
+	../RobotSimulator/b3RobotSimulatorClientAPI.cpp
+	../RobotSimulator/b3RobotSimulatorClientAPI.h
 	../BasicDemo/BasicExample.cpp
 	../BasicDemo/BasicExample.h
 	../InverseDynamics/InverseDynamicsExample.cpp
@@ -161,26 +191,19 @@ SET(BulletExampleBrowser_SRCS
 	../InverseKinematics/InverseKinematicsExample.h
 	../ForkLift/ForkLiftDemo.cpp
 	../ForkLift/ForkLiftDemo.h
+	../MultiThreadedDemo/MultiThreadedDemo.cpp
+	../MultiThreadedDemo/MultiThreadedDemo.h
+	../MultiThreadedDemo/CommonRigidBodyMTBase.cpp
+	../MultiThreadedDemo/CommonRigidBodyMTBase.h
 	../Tutorial/Tutorial.cpp
 	../Tutorial/Tutorial.h
 	../Tutorial/Dof6ConstraintTutorial.cpp
 	../Tutorial/Dof6ConstraintTutorial.h
-	../ExtendedTutorials/SimpleBox.cpp
-	../ExtendedTutorials/SimpleBox.h
-	../ExtendedTutorials/MultipleBoxes.cpp
-	../ExtendedTutorials/MultipleBoxes.h
-	../ExtendedTutorials/SimpleCloth.cpp
-	../ExtendedTutorials/SimpleCloth.h
-	../ExtendedTutorials/SimpleJoint.cpp
-	../ExtendedTutorials/SimpleJoint.h
-	../ExtendedTutorials/NewtonsCradle.cpp
-	../ExtendedTutorials/NewtonsCradle.h
+	../Evolution/NN3DWalkers.cpp
+	../Evolution/NN3DWalkers.h
+	../Evolution/NN3DWalkersTimeWarpBase.h
 	../ExtendedTutorials/NewtonsRopeCradle.cpp
 	../ExtendedTutorials/NewtonsRopeCradle.h
-	../ExtendedTutorials/InclinedPlane.cpp
-	../ExtendedTutorials/InclinedPlane.h
-	../ExtendedTutorials/MultiPendulum.cpp
-	../ExtendedTutorials/MultiPendulum.h
 	../Collision/CollisionSdkC_Api.cpp
 	../Collision/CollisionSdkC_Api.h
 	../Collision/CollisionTutorialBullet2.cpp
@@ -220,8 +243,6 @@ SET(BulletExampleBrowser_SRCS
 	
 	../RoboticsLearning/GripperGraspExample.cpp
 	../RoboticsLearning/GripperGraspExample.h
-	../RoboticsLearning/b3RobotSimAPI.cpp
-	../RoboticsLearning/b3RobotSimAPI.h
 	../RoboticsLearning/R2D2GraspExample.cpp
 	../RoboticsLearning/R2D2GraspExample.h
 	../RoboticsLearning/KukaGraspExample.cpp
@@ -244,6 +265,7 @@ SET(BulletExampleBrowser_SRCS
 	../Importers/ImportMeshUtility/b3ImportMeshUtility.cpp
 ../Importers/ImportMeshUtility/b3ImportMeshUtility.h
 	../../Extras/Serialize/BulletWorldImporter/btWorldImporter.cpp
+	../../Extras/Serialize/BulletWorldImporter/btMultiBodyWorldImporter.cpp
 	../../Extras/Serialize/BulletWorldImporter/btBulletWorldImporter.cpp
 	../../Extras/Serialize/BulletFileLoader/bChunk.cpp		
 	../../Extras/Serialize/BulletFileLoader/bFile.cpp
@@ -265,6 +287,11 @@ SET(BulletExampleBrowser_SRCS
   ../Importers/ImportURDFDemo/ImportURDFSetup.h
   ../Importers/ImportURDFDemo/URDF2Bullet.h
   ../Importers/ImportURDFDemo/urdf_samples.h
+  ../Importers/ImportURDFDemo/urdf_samples.h
+	../Importers/ImportMJCFDemo/BulletMJCFImporter.cpp
+	../Importers/ImportMJCFDemo/BulletMJCFImporter.h
+	../Importers/ImportMJCFDemo/ImportMJCFSetup.cpp
+	../Importers/ImportMJCFDemo/ImportMJCFSetup.h
   ../Importers/ImportBsp/BspConverter.cpp
   ../Importers/ImportBsp/BspLoader.cpp
   ../Importers/ImportBsp/ImportBspExample.cpp
@@ -280,6 +307,8 @@ SET(BulletExampleBrowser_SRCS
   ../Importers/ImportURDFDemo/MyMultiBodyCreator.cpp
   ../Importers/ImportURDFDemo/MyMultiBodyCreator.h
   ../Importers/ImportURDFDemo/UrdfParser.cpp
+  ../Utils/RobotLoggingUtil.cpp
+  ../Utils/RobotLoggingUtil.h
   ../Importers/ImportURDFDemo/urdfStringSplit.cpp
  ../Importers/ImportURDFDemo/urdfStringSplit.h
   ../Importers/ImportURDFDemo/BulletUrdfImporter.cpp
@@ -314,15 +343,8 @@ SET(BulletExampleBrowser_SRCS
 	../ThirdPartyLibs/stb_image/stb_image.h
 	
 	../ThirdPartyLibs/Wavefront/tiny_obj_loader.cpp
-	../ThirdPartyLibs/tinyxml/tinystr.cpp
-	../ThirdPartyLibs/tinyxml/tinyxml.cpp
-	../ThirdPartyLibs/tinyxml/tinyxmlerror.cpp
-	../ThirdPartyLibs/tinyxml/tinyxmlparser.cpp
-
-	../ThirdPartyLibs/tinyxml/tinystr.cpp
-	../ThirdPartyLibs/tinyxml/tinyxml.cpp
-	../ThirdPartyLibs/tinyxml/tinyxmlerror.cpp
-	../ThirdPartyLibs/tinyxml/tinyxmlparser.cpp
+	
+	../ThirdPartyLibs/tinyxml2/tinyxml2.cpp
 	InProcessExampleBrowser.cpp
 	${BULLET_PHYSICS_SOURCE_DIR}/build3/bullet.rc
 )
@@ -345,9 +367,26 @@ ADD_CUSTOM_COMMAND(
                 COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${BULLET_PHYSICS_SOURCE_DIR}/data ${PROJECT_BINARY_DIR}/data
         )
 
+IF (BULLET2_USE_TBB_MULTITHREADING AND WIN32)
+    # add a post build command to copy some dlls to the executable directory
+    set(TBB_VC_VER "vc12")
+    set(TBB_VC_ARCH "ia32")
+    # assume 32-bit build in VC12 for now
+    # checks can be added here at a later time
+    ADD_CUSTOM_COMMAND(TARGET App_ExampleBrowser POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${BULLET2_TBB_INCLUDE_DIR}/../bin/${TBB_VC_ARCH}/${TBB_VC_VER}/tbb.dll"
+        $<TARGET_FILE_DIR:App_ExampleBrowser>)
+    ADD_CUSTOM_COMMAND(TARGET App_ExampleBrowser POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${BULLET2_TBB_INCLUDE_DIR}/../bin/${TBB_VC_ARCH}/${TBB_VC_VER}/tbbmalloc.dll"
+        $<TARGET_FILE_DIR:App_ExampleBrowser>)
+ENDIF (BULLET2_USE_TBB_MULTITHREADING AND WIN32)
+
 
 IF (INTERNAL_ADD_POSTFIX_EXECUTABLE_NAMES)
 			SET_TARGET_PROPERTIES(App_ExampleBrowser PROPERTIES  DEBUG_POSTFIX "_Debug")
 			SET_TARGET_PROPERTIES(App_ExampleBrowser PROPERTIES  MINSIZEREL_POSTFIX "_MinsizeRel")
 			SET_TARGET_PROPERTIES(App_ExampleBrowser PROPERTIES  RELWITHDEBINFO_POSTFIX "_RelWithDebugInfo")
 ENDIF(INTERNAL_ADD_POSTFIX_EXECUTABLE_NAMES)
+

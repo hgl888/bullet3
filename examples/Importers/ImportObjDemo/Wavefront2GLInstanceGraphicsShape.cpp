@@ -2,7 +2,8 @@
 
 #include "../../OpenGLWindow/GLInstancingRenderer.h"
 #include "../../OpenGLWindow/GLInstanceGraphicsShape.h"
-#include "btBulletDynamicsCommon.h"
+//#include "btBulletDynamicsCommon.h"
+#include "LinearMath/btVector3.h"
 #include "../../OpenGLWindow/SimpleOpenGL3App.h"
 #include "Wavefront2GLInstanceGraphicsShape.h"
 #include "../../OpenGLWindow/GLInstancingRenderer.h"
@@ -33,7 +34,7 @@ GLInstanceGraphicsShape* btgCreateGraphicsShapeFromWavefrontObj(std::vector<tiny
 					int vtxBaseIndex = vertices->size();
 					
 					
-					if (f<0 && f>=shape.mesh.indices.size())
+					if (f<0 && f>=int(shape.mesh.indices.size()))
 					{
 						continue;
 					}
@@ -49,13 +50,13 @@ GLInstanceGraphicsShape* btgCreateGraphicsShapeFromWavefrontObj(std::vector<tiny
 					{
 						int uv0Index = shape.mesh.indices[f]*2+0;
 						int uv1Index = shape.mesh.indices[f]*2+1;
-						if (uv0Index>=0 && uv1Index>=0 && (uv0Index < shape.mesh.texcoords.size()) && (uv1Index < shape.mesh.texcoords.size()))
+						if (uv0Index>=0 && uv1Index>=0 && (uv0Index < int(shape.mesh.texcoords.size()) && (uv1Index < shape.mesh.texcoords.size())))
 						{
 							vtx0.uv[0] = shape.mesh.texcoords[uv0Index];
 							vtx0.uv[1] = shape.mesh.texcoords[uv1Index];
 						} else
 						{
-							b3Warning("obj texture coordinate out-of-range!");
+						//	b3Warning("obj texture coordinate out-of-range!");
 							vtx0.uv[0] = 0;
 							vtx0.uv[1] = 0;
 						}
@@ -82,7 +83,7 @@ GLInstanceGraphicsShape* btgCreateGraphicsShapeFromWavefrontObj(std::vector<tiny
 							vtx1.uv[1] = shape.mesh.texcoords[uv1Index];
 						} else
 						{
-							b3Warning("obj texture coordinate out-of-range!");
+						//	b3Warning("obj texture coordinate out-of-range!");
 							vtx1.uv[0] = 0;
 							vtx1.uv[1] = 0;
 						}

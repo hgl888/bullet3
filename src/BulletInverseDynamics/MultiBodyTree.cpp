@@ -226,10 +226,10 @@ int MultiBodyTree::addBody(int body_index, int parent_index, JointType joint_typ
 				warning_message(
 					"axis of motion not a unit axis ([%f %f %f]), will use normalized vector\n",
 					body_axis_of_motion(0), body_axis_of_motion(1), body_axis_of_motion(2));
-				idScalar length = std::sqrt(std::pow(body_axis_of_motion(0), 2) +
-											std::pow(body_axis_of_motion(1), 2) +
-											std::pow(body_axis_of_motion(2), 2));
-				if (length < std::sqrt(std::numeric_limits<idScalar>::min())) {
+				idScalar length = BT_ID_SQRT(BT_ID_POW(body_axis_of_motion(0), 2) +
+									   BT_ID_POW(body_axis_of_motion(1), 2) +
+									   BT_ID_POW(body_axis_of_motion(2), 2));
+				if (length < BT_ID_SQRT(std::numeric_limits<idScalar>::min())) {
 					error_message("axis of motion vector too short (%e)\n", length);
 					return -1;
 				}
@@ -330,6 +330,22 @@ int MultiBodyTree::finalize() {
 		rigid_body.m_body_T_parent_ref = joint.m_child_T_parent_ref;
 		rigid_body.m_parent_pos_parent_body_ref = joint.m_parent_pos_parent_child_ref;
 		rigid_body.m_joint_type = joint.m_type;
+
+		int user_int;
+		if (-1 == m_init_cache->getUserInt(index, &user_int)) {
+			return -1;
+		}
+		if (-1 == m_impl->setUserInt(index, user_int)) {
+			return -1;
+		}
+
+		void* user_ptr;
+		if (-1 == m_init_cache->getUserPtr(index, &user_ptr)) {
+			return -1;
+		}
+		if (-1 == m_impl->setUserPtr(index, user_ptr)) {
+			return -1;
+		}
 
 		// Set joint Jacobians. Note that the dimension is always 3x1 here to avoid variable sized
 		// matrices.

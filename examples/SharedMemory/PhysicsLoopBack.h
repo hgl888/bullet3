@@ -48,10 +48,18 @@ public:
 
     virtual bool getJointInfo(int bodyIndex, int jointIndex, struct b3JointInfo& info) const;
 
+    virtual int getNumUserConstraints() const;
+    
+    virtual int getUserConstraintInfo(int constraintUniqueId, struct b3UserConstraint&info) const;
+	
+	virtual int getUserConstraintId(int serialIndex) const;
+    
 	///todo: move this out of the
     virtual void setSharedMemoryKey(int key);
 
     void uploadBulletFileToSharedMemory(const char* data, int len);
+	
+	virtual void uploadRaysToSharedMemory(struct SharedMemoryCommand& command, const double* rayFromWorldArray, const double* rayToWorldArray, int numRays);
 
     virtual int getNumDebugLines() const;
 
@@ -62,6 +70,32 @@ public:
 	
 	virtual void getCachedContactPointInformation(struct b3ContactInformation* contactPointData);
 
+	virtual void getCachedOverlappingObjects(struct b3AABBOverlapData* overlappingObjects);
+
+	virtual void getCachedVisualShapeInformation(struct b3VisualShapeInformation* visualShapesInfo);
+
+	virtual void getCachedCollisionShapeInformation(struct b3CollisionShapeInformation* collisionShapesInfo);
+
+	virtual void getCachedVREvents(struct b3VREventsData* vrEventsData);
+
+	virtual void getCachedKeyboardEvents(struct b3KeyboardEventsData* keyboardEventsData);
+
+	virtual void getCachedMouseEvents(struct b3MouseEventsData* mouseEventsData);
+
+	virtual void getCachedRaycastHits(struct b3RaycastInformation* raycastHits);
+
+	virtual void getCachedMassMatrix(int dofCountCheck, double* massMatrix);
+
+	virtual void setTimeOut(double timeOutInSeconds);
+	virtual double getTimeOut() const;
+
+	virtual bool getCachedUserData(int userDataId, struct b3UserDataValue &valueOut) const;
+	virtual int getCachedUserDataId(int bodyUniqueId, int linkIndex, int visualShapeIndex, const char *key) const;
+	virtual int getNumUserData(int bodyUniqueId) const;
+	virtual void getUserDataInfo(int bodyUniqueId, int userDataIndex, const char **keyOut, int *userDataIdOut, int *linkIndexOut, int *visualShapeIndexOut) const;
+	
+	virtual void pushProfileTiming(const char* timingName);
+	virtual void popProfileTiming();
 };
 
 #endif //PHYSICS_LOOP_BACK_H
